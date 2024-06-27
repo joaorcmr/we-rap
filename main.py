@@ -13,7 +13,8 @@ def main():
   base64_imagem = gcloud_service.get_image_from_bucket(imagem_name)
   response_openai = openai_service.read_image(base64_imagem)
 
-  print(response_openai)
+  print(response_openai.choices[0].message.content)
+  
 
-
-main()
+if __name__ == "__main__":
+  main()
