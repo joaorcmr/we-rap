@@ -1,21 +1,20 @@
 from infra import EnvConfig
 import requests
 import pandas as pd
-from openai import OpenAI
 import os
+import google.generativeai as genai
+
+class GeminiService:
+    def __init__(self, env_config: EnvConfig) -> None:
+        self.key = env_config.get_env("GAMINEE_API_KEY")
+        self.url = env_config.get_env("GAMINEE_URL")
+        
+        
+        genai.configure(api_key=self.key)
 
 
-class OpenaiService:
-  def __init__(self, env_config: EnvConfig) -> None:
-    key = env_config.get_env("OPENAI_API_KEY")
-    url = env_config.get_env("OPENAI_URL")
-
-    self.key = key
-    self.url = url
-    self.api = OpenAI(api_key=self.key)
-
-  def read_image(self, base64_image: str):
-    prompt = """
+    def read_image(self, base64_image: str):
+        prompt = """
         You are an AI assistant tasked with reading and interpreting medical prescriptions. This is a critical task that requires attention to detail and careful consideration of all information provided. Your goal is to accurately interpret the prescription and provide clear, concise information that can be easily understood by healthcare professionals and patients.
         
         You will be provided with an image of a medical prescription. Here is the prescription image:
@@ -72,39 +71,41 @@ class OpenaiService:
         - Return the message in JSON format, exclude </interpretation>
         - Remove Json markdown in the message 
         """
-    
-    payload = {         
-  "model": "gpt-4o",
-  "messages": [
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "text",
-          "text": prompt
-        },
-        {
-          "type": "image_url",
-          "image_url": {
-            "url": f"data:image/jpeg;base64,{base64_image}" 
-          }
+        
+        payload = {
+            "model": "gaminee-model",
+            "prompt": prompt,
+            "image": base64_image,
+            "max_tokens": 3000
         }
-      ]
-    }
-  ],
-  "max_tokens": 3000
-}
-    headers = {
-     "Content-Type": "application/json",
-  "Authorization": f"Bearer {self.key}"
-    }
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.key}"
+        }
 
+        response = requests.post(self.url, json=payload, headers=headers)
+        
+        if response.status_code == 200:
+            json_response = response.json()
+            self.store_response_in_csv(json_response)
+            return json_response
+        
+        return None
 
-    response = self.api.chat.completions.create(**payload)
-    
-    if response:
-      return response
-    
-    return None
-  
-  
+    def store_response_in_csv(self, response):
+        # Convert response to DataFrame
+        data = {
+            "content": [response["content"]]
+        }
+        df = pd.DataFrame(data)
+
+        # Check if the CSV file exists
+        if os.path.isfile(self.csv_file_path):
+            # Append to the existing CSV file
+            df.to_csv(self.csv_file_path, mode='a', header=False, index=False)
+        else:
+            # Create a new CSV file
+            df.to_csv(self.csv_file_path, index=False)
+
+        print(f"Response stored in {self.csv_file_path}")
