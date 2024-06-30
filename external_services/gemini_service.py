@@ -1,19 +1,16 @@
+import google.generativeai as genai
+import os
 from infra import EnvConfig
-from openai import OpenAI
+import base64
 
 
-
-class OpenaiService:
-  def __init__(self, env_config: EnvConfig) -> None:
-    key = env_config.get_env("OPENAI_API_KEY")
-    url = env_config.get_env("OPENAI_URL")
-
-    self.key = key
-    self.url = url
-    self.api = OpenAI(api_key=self.key)
-
-  def read_image(self, base64_image: str):
-    prompt = """
+class GeminiService:
+    def __init__(self, env_config: EnvConfig) -> None:
+        self.key = env_config.get_env("GEMINI_API_KEY")
+        self.url = env_config.get_env("GEMINI_URL")
+        self.model = genai.GenerativeModel('gemini-1.5-pro')
+        self.api = genai.configure(api_key=self.key)
+        self.prompt = """
         You are an AI assistant tasked with reading and interpreting medical prescriptions. This is a critical task that requires attention to detail and careful consideration of all information provided. Your goal is to accurately interpret the prescription and provide clear, concise information that can be easily understood by healthcare professionals and patients.
         
         You will be provided with an image of a medical prescription. Here is the prescription image:
@@ -70,39 +67,17 @@ class OpenaiService:
         - Return the message in JSON format, exclude </interpretation>
         - Remove Json markdown in the message 
         """
-    
-    payload = {         
-  "model": "gpt-4o",
-  "messages": [
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "text",
-          "text": prompt
-        },
-        {
-          "type": "image_url",
-          "image_url": {
-            "url": f"data:image/jpeg;base64,{base64_image}" 
-          }
+
+    def read_image(self, file_path):
+        with open(file_path, "rb") as image_file:
+            self.base64_encoded_data = base64.b64encode(image_file.read()).decode('utf-8')
+        mime_type = "image/png"  # Adjust as necessary based on your image file type
+        return {
+            "inlineData": {"data": self.base64_encoded_data, "mimeType": mime_type}
         }
-      ]
-    }
-  ],
-  "max_tokens": 3000
-}
-    headers = {
-     "Content-Type": "application/json",
-  "Authorization": f"Bearer {self.key}"
-    }
 
-
-    response = self.api.chat.completions.create(**payload)
-    
-    if response:
-      return response.choices[0].message.content
-    
-    return None
-  
-  
+    def run(self, file_paths):
+        image = self.base64_encoded_data
+        result = self.model.generate_content([self.prompt], image)
+        print(result)
+        return result
