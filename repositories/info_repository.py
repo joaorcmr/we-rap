@@ -4,25 +4,32 @@ import os
 
 class InfoRepository:
     def __init__(self) -> None:
-        self.csv_file_path = "prescriptions.csv"
+        self.csv_file_path_openai = "prescriptions1.csv"
+        self.csv_file_path_claude = "prescriptions2.csv"
 
     def save_openai(self, response):
-        # Convert response to DataFrame
         data = {
-            response.choices[0].message.content
+            response
         }
         df = pd.DataFrame(data)
 
-        # Check if the CSV file exists
-        if os.path.isfile(self.csv_file_path):
-            # Append to the existing CSV file
-            df.to_csv(self.csv_file_path, mode='a', header=False, index=False)
+        if os.path.isfile(self.csv_file_path_openai):
+            df.to_csv(self.csv_file_path_openai, mode='a', header=False, index=False)
         else:
-            # Create a new CSV file
-            df.to_csv(self.csv_file_path, index=False)
+            df.to_csv(self.csv_file_path_openai, index=False)
 
-        print(f"Response stored in {self.csv_file_path}")
+        print(f"Response stored in {self.csv_file_path_openai}")
 
-    def save_gemini(self, response):
-        pass
+    def save_claude(self, response):
+        data = {
+            response
+        }
+        df = pd.DataFrame(data)
+
+        if os.path.isfile(self.csv_file_path_claude):
+            df.to_csv(self.csv_file_path_claude, mode='a', header=False, index=False)
+        else:
+            df.to_csv(self.csv_file_path_claude, index=False)
+
+        print(f"Response stored in {self.csv_file_path_claude}")
         
