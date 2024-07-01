@@ -33,6 +33,7 @@ class OpenaiService:
         - Doctor CRM
         - Doctor ocupation
         - Stamp (True or false)
+        - Pdf or picture
 
         Interpret the prescription by considering:
         - The legibility of the handwriting
@@ -48,6 +49,7 @@ class OpenaiService:
         Doctor CRM:
         Doctor Ocupation:
         Stamp (True or false):
+        Pdf or picture:
         Medication(s):
         [Drug Name]
         Dosage:

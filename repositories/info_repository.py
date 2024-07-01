@@ -5,7 +5,7 @@ import os
 class InfoRepository:
     def __init__(self) -> None:
         self.csv_file_path_openai = "prescriptions1.csv"
-        self.csv_file_path_claude = "prescriptions2.csv"
+        self.csv_file_path_claude = "prescriptions3.csv"
 
     def save_openai(self, response):
         data = {

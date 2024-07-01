@@ -2,3 +2,6 @@
 .env
 pycache
 __pycache__
+prescriptions1.csv
+prescriptions2.csv
+prescriptions3.csv

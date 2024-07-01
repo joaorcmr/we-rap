@@ -29,6 +29,7 @@ class ClaudeService:
         - Doctor CRM
         - Doctor ocupation
         - Stamp (True or false)
+        - PDF or picture 
 
         Interpret the prescription by considering:
         - The legibility of the handwriting
@@ -44,6 +45,7 @@ class ClaudeService:
         Doctor CRM:
         Doctor Ocupation:
         Stamp (True or false):
+        Pdf or picture:
         Medication(s):
         [Drug Name]
         Dosage:
@@ -78,7 +80,7 @@ class ClaudeService:
                             "type": "image",
                             "source": {
                                 "type": "base64",
-                                "media_type": "image/png",
+                                "media_type": "image/jpeg",
                                 "data": base64_image,
                             },
                         },
